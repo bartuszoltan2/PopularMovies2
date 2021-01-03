@@ -1,6 +1,7 @@
 package com.zobartus.android.movies;
 
 import android.annotation.SuppressLint;
+import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -51,7 +52,20 @@ public class MainActivity extends AppCompatActivity {
         if (savedInstanceState != null) {
             selectedItem = savedInstanceState.getInt("OPTION");
         }
-        new FetchDataAsyncTask().execute(Constants.POPULAR_QUERY_PARAM);
+
+        switch (selectedItem) {
+            case R.id.top_rated_setting:
+                new FetchDataAsyncTask().execute(Constants.TOP_RATED_QUERY_PARAM);
+                break;
+
+            case R.id.favorite_movie_setting:
+                showViewModel();
+                break;
+
+            default:
+                new FetchDataAsyncTask().execute(Constants.POPULAR_QUERY_PARAM);
+                break;
+        }
     }
 
     @Override
@@ -136,6 +150,12 @@ public class MainActivity extends AppCompatActivity {
             mImageAdapter.notifyDataSetChanged();
             mImageAdapter.setMovies(movies1);
         });
+    }
+    public void showViewModel() {
+        MainViewModel viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        Movie[] movies = viewModel.getMovies().getValue();
+        mImageAdapter = new ImageAdapter(getApplicationContext(), movies);
+        mRecyclerView.setAdapter(mImageAdapter);
     }
 
     public Movie[] makeMoviesDataToArray(String moviesJsonResults) throws JSONException {
